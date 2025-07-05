@@ -21,69 +21,46 @@ let bot;
 
 function createBot() {
   console.log('🔄 Creating bot...');
-  console.log('📡 Target server: exarserver.aternos.me:52206');
-  console.log('👤 Bot username: serverexarbot');
   
-  try {
-    bot = mineflayer.createBot({
-      host: 'exarserver.aternos.me',
-      port: 52206,
-      username: 'serverexarbot',
-      version: false, // كشف تلقائي      auth: 'offline',
-      verbose: true // تفعيل الرسائل التفصيلية
+  bot = mineflayer.createBot({
+    host: 'exarserver.aternos.me',
+    port: 52206,
+    username: 'serverexarbot',
+    version: '1.21.4',
+    auth: 'offline'
+  });
+
+  // قبول Resource Pack تلقائياً
+  bot._client.on('resource_pack_send', (packet) => {
+    console.log('📦 Resource Pack detected!');
+    bot._client.write('resource_pack_receive', {
+      result: 0 // 0 = successfully loaded
     });
+    console.log('✅ Resource Pack accepted!');
+  });
 
-    // تتبع كل مراحل الاتصال
-    bot._client.on('connect', () => {
-      console.log('✅ TCP connected!');
-    });
+  // طريقة بديلة
+  bot.on('resourcePack', (url, hash) => {
+    console.log('📦 Accepting resource pack...');
+    if (bot.acceptResourcePack) {
+      bot.acceptResourcePack();
+    }
+  });
 
-    bot._client.on('error', (err) => {
-      console.error('❌ Connection error:', err);
-    });
+  bot.once('spawn', () => {
+    console.log('✅ Bot spawned!');
+    bot.chat('Hello! Bot is online 24/7');
+    startAntiAFK();
+  });
 
-    bot._client.on('end', (reason) => {
-      console.log('🔌 Connection ended:', reason);
-    });
+  bot.on('error', (err) => {
+    console.log('❌ Error:', err.message);
+  });
 
-    bot.on('login', () => {
-      console.log('✅ Logged in!');
-    });
-
-    bot.on('spawn', () => {
-      console.log('🎉 Bot spawned successfully!');
-      bot.chat('Bot online 24/7!');
-      startAntiAFK();
-    });
-
-    bot.on('kicked', (reason) => {
-      console.log('⚠️ Kicked:', reason);
-    });
-
-    bot.on('error', (err) => {
-      console.error('❌ Bot error:', err);
-    });
-
-    bot.on('end', () => {
-      console.log('🔌 Bot disconnected, reconnecting in 5s...');
-      setTimeout(createBot, 5000);
-    });
-
-    // Timeout check
-    setTimeout(() => {
-      if (!bot || !bot.entity) {
-        console.log('⏱️ Connection timeout after 30s');
-        console.log('💡 Possible issues:');
-        console.log('   1. Server is offline');
-        console.log('   2. Port 52206 is closed');
-        console.log('   3. Whitelist blocking');
-        console.log('   4. Server mods blocking bots');
-      }
-    }, 30000);
-
-  } catch (error) {
-    console.error('❌ Failed to create bot:', error);
-  }
+  bot.on('end', () => {
+    console.log('🔌 Disconnected, reconnecting...');
+    setTimeout(createBot, 5000);
+  });
 }
 
 function startAntiAFK() {
