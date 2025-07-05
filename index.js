@@ -75,3 +75,12 @@ function startAntiAFK() {
 
 createBot();
 console.log('🚀 Bot system started!');
+// Self-ping لإبقاء الخدمة حية
+if (process.env.RENDER) {
+  const url = `https://${process.env.RENDER_EXTERNAL_HOSTNAME}`;
+  setInterval(() => {
+    fetch(url)
+      .then(() => console.log('Self-ping successful'))
+      .catch(() => console.log('Self-ping failed'));
+  }, 4 * 60 * 1000); // كل 4 دقائق
+}
