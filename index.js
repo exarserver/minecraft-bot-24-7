@@ -29,8 +29,7 @@ function createBot() {
       host: 'exarserver.aternos.me',
       port: 52206,
       username: 'serverexarbot',
-      version: '1.21.4',
-      auth: 'offline',
+      version: false, // كشف تلقائي      auth: 'offline',
       verbose: true // تفعيل الرسائل التفصيلية
     });
 
